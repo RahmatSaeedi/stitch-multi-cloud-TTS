@@ -153,65 +153,33 @@
         window.piperTTSLib = piperTTS;
     </script>
 
-    <!-- eSpeak-NG using Web Speech API (built into browser) -->
+    <!-- eSpeak-NG using meSpeak.js library -->
+    <!-- meSpeak.js - A JavaScript port of eSpeak that can export WAV files -->
+    <script src="https://www.masswerk.at/mespeak/mespeak.js"></script>
     <script>
-        // Use browser's built-in Web Speech API as eSpeak alternative
-        // This is more reliable and works offline with system voices
-        if ('speechSynthesis' in window) {
-            window.meSpeak = {
-                speak: function(text, options) {
-                    options = options || {};
+        // Configure meSpeak after it loads
+        if (window.meSpeak) {
+            // Load eSpeak configuration and voices
+            (async function() {
+                try {
+                    // Load default config
+                    await new Promise((resolve, reject) => {
+                        meSpeak.loadConfig('https://www.masswerk.at/mespeak/mespeak_config.json');
+                        // Give it time to load
+                        setTimeout(resolve, 500);
+                    });
 
-                    if (options.rawdata === 'mime') {
-                        // Web Speech API doesn't support raw audio data export
-                        return null;
-                    }
+                    // Load default English voice
+                    await new Promise((resolve, reject) => {
+                        meSpeak.loadVoice('https://www.masswerk.at/mespeak/voices/en/en-us.json');
+                        setTimeout(resolve, 500);
+                    });
 
-                    const utterance = new SpeechSynthesisUtterance(text);
-
-                    // Map options to SpeechSynthesisUtterance properties
-                    utterance.rate = (options.speed || 175) / 175; // Normalize to ~1.0
-                    utterance.pitch = (options.pitch || 50) / 50; // Normalize to ~1.0
-                    utterance.volume = options.amplitude ? options.amplitude / 100 : 1.0;
-
-                    // Try to find matching voice
-                    if (options.voice) {
-                        const voices = speechSynthesis.getVoices();
-                        const matchingVoice = voices.find(v =>
-                            v.lang.toLowerCase().includes(options.voice.toLowerCase()) ||
-                            v.name.toLowerCase().includes(options.voice.toLowerCase())
-                        );
-                        if (matchingVoice) {
-                            utterance.voice = matchingVoice;
-                        }
-                    }
-
-                    speechSynthesis.speak(utterance);
-                    return null;
-                },
-
-                getVoices: function() {
-                    // Return actual Web Speech API voices
-                    const voices = speechSynthesis.getVoices();
-                    return voices.map(v => ({
-                        id: v.lang,
-                        name: v.name,
-                        lang: v.lang,
-                        language: v.lang
-                    }));
+                    console.log('meSpeak initialized successfully');
+                } catch (error) {
+                    console.error('Error loading meSpeak:', error);
                 }
-            };
-
-            // Wait for voices to load
-            speechSynthesis.getVoices();
-            if (speechSynthesis.onvoiceschanged !== undefined) {
-                speechSynthesis.onvoiceschanged = () => {
-                    speechSynthesis.getVoices();
-                };
-            }
-        } else {
-            console.error('Web Speech API not supported in this browser');
-            window.meSpeak = null;
+            })();
         }
     </script>
     <script src="js/piper-tts.js"></script>

@@ -650,7 +650,20 @@ else
                 if (result.Success && result.AudioData != null)
                 {
                     _audioData = result.AudioData;
-                    _audioDataUrl = $"data:audio/mpeg;base64,{Convert.ToBase64String(_audioData)}";
+
+                    // Offline providers (Piper, eSpeak-NG) return WAV, cloud providers return MP3
+                    var providerInfo = provider.GetProviderInfo();
+                    if (!providerInfo.RequiresApiKey)
+                    {
+                        _audioDataUrl = $"data:audio/wav;base64,{Convert.ToBase64String(_audioData)}";
+                        _audioMimeType = "audio/wav";
+                    }
+                    else
+                    {
+                        _audioDataUrl = $"data:audio/mpeg;base64,{Convert.ToBase64String(_audioData)}";
+                        _audioMimeType = "audio/mpeg";
+                    }
+
                     _actualCost = result.Cost;
                     _synthesisDuration = result.Duration;
 

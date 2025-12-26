@@ -72,21 +72,35 @@ window.espeakNG = {
 
         try {
             // Check if eSpeak library is available
-            if (!espeakLib || typeof espeakLib.speak !== 'function') {
-                console.warn('Web Speech API not available, using fallback');
+            if (!espeakLib || typeof espeakLib.getWav !== 'function') {
+                console.warn('meSpeak library not available, using fallback');
                 return this.generateTestBeep(1.0);
             }
 
-            // Web Speech API doesn't return audio data, it plays directly
-            // Just trigger the speech and return a silent WAV as placeholder
-            espeakLib.speak(text, {
-                voice: voice,
+            // Parse voice to extract language/variant
+            // Voice format can be: "en", "en-us", "en-gb", etc.
+            let voiceOptions = {
                 speed: speed,
-                pitch: pitch
-            });
+                pitch: pitch,
+                wordgap: 0
+            };
 
-            // Return a short silent WAV so the UI doesn't error
-            return this.generateSilentWav(0.1);
+            // If voice includes variant (e.g., "en-us"), set it
+            if (voice.includes('-')) {
+                const parts = voice.split('-');
+                voiceOptions.variant = parts[1];
+            }
+
+            // Use meSpeak.getWav() to generate WAV file instead of playing
+            const wavData = espeakLib.getWav(text, voiceOptions);
+
+            if (!wavData) {
+                console.error('meSpeak.getWav returned null');
+                return this.generateTestBeep(1.0);
+            }
+
+            // Convert Uint8Array to base64
+            return this.arrayBufferToBase64(wavData.buffer);
 
         } catch (error) {
             console.error('eSpeak synthesis error:', error);
