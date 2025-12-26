@@ -439,18 +439,45 @@ window.piperTTS = {
             const voices = await piperLib.voices();
             console.log(`📋 Retrieved ${voices.length} available Piper voices`);
 
+            // Log first voice to see structure
+            if (voices.length > 0) {
+                console.log('Sample voice structure:', voices[0]);
+                console.log('Language property type:', typeof voices[0].language);
+                console.log('Language property value:', voices[0].language);
+            }
+
             // Transform to our format
-            return voices.map(v => ({
-                id: v.key,
-                name: v.name || v.key,
-                language: v.language || 'Unknown',
-                languageCode: v.language || 'unknown',
-                gender: 'NEUTRAL', // Piper doesn't provide gender info
-                quality: this.extractQuality(v.key),
-                sizeBytes: v.size || 0
-            }));
+            return voices.map(v => {
+                // Extract language info - the language property is an object with code, family, region, name_native, name_english
+                let languageName = 'Unknown';
+                let languageCode = 'unknown';
+
+                if (v.language) {
+                    if (typeof v.language === 'string') {
+                        // If it's already a string, use it
+                        languageName = v.language;
+                        languageCode = v.language;
+                    } else if (typeof v.language === 'object') {
+                        // Extract from language object
+                        languageName = v.language.name_english || v.language.name_native || v.language.family || 'Unknown';
+                        languageCode = v.language.code || v.language.family || 'unknown';
+                    }
+                }
+
+                return {
+                    id: v.key,
+                    name: v.name || v.key,
+                    language: languageName,
+                    languageCode: languageCode,
+                    gender: 'NEUTRAL', // Piper doesn't provide gender info
+                    quality: this.extractQuality(v.key),
+                    sizeBytes: v.size || 0
+                };
+            });
         } catch (error) {
             console.error('❌ Error getting available voices:', error);
+            console.error('Error details:', error.message);
+            console.error('Stack:', error.stack);
             return [];
         }
     },

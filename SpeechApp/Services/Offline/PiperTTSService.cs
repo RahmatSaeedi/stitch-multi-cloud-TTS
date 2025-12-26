@@ -215,10 +215,36 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
                     Console.WriteLine($"Refreshed downloaded models: {downloaded.Count} models");
 
                     // Set flag to notify other pages that models have been updated
-                    var updateTimestamp = DateTime.UtcNow.Ticks.ToString();
-                    Console.WriteLine($"Setting piper_models_updated flag to: {updateTimestamp}");
-                    await _storageService.SetPreferenceAsync<string>("piper_models_updated", updateTimestamp);
-                    Console.WriteLine("✅ Update flag set successfully");
+                    try
+                    {
+                        var updateTimestamp = DateTime.UtcNow.Ticks.ToString();
+                        Console.WriteLine($"Setting piper_models_updated flag to: {updateTimestamp}");
+                        Console.WriteLine($"_storageService is null: {_storageService == null}");
+                        Console.WriteLine($"updateTimestamp is null: {updateTimestamp == null}");
+
+                        if (_storageService != null && !string.IsNullOrEmpty(updateTimestamp))
+                        {
+                            await _storageService.SetPreferenceAsync<string>("piper_models_updated", updateTimestamp);
+                            Console.WriteLine("✅ Update flag set successfully");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"⚠️ Cannot set preference: _storageService={_storageService != null}, timestamp={!string.IsNullOrEmpty(updateTimestamp)}");
+                        }
+                    }
+                    catch (Exception storageEx)
+                    {
+                        Console.WriteLine($"❌ Error setting storage preference: {storageEx.GetType().FullName}");
+                        Console.WriteLine($"Message: {storageEx.Message}");
+                        Console.WriteLine($"Stack: {storageEx.StackTrace}");
+                        if (storageEx.InnerException != null)
+                        {
+                            Console.WriteLine($"Inner: {storageEx.InnerException.GetType().FullName} - {storageEx.InnerException.Message}");
+                            Console.WriteLine($"Inner Stack: {storageEx.InnerException.StackTrace}");
+                        }
+                        // Try without setting the flag - not critical
+                        Console.WriteLine("⚠️ Continuing without setting update flag");
+                    }
                 }
                 catch (Exception refreshEx)
                 {

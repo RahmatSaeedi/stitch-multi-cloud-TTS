@@ -164,21 +164,39 @@
 
             script.onload = async function() {
                 console.log('✅ meSpeak.js script loaded');
+                console.log('Checking global scope for meSpeak...');
+                console.log('typeof window.meSpeak:', typeof window.meSpeak);
+                console.log('typeof meSpeak:', typeof meSpeak);
+                console.log('window.meSpeak:', window.meSpeak);
 
-                if (typeof window.meSpeak !== 'undefined') {
+                // Try to find meSpeak in different locations
+                let meSpeakLib = window.meSpeak || window.mespeak || window.MeSpeak;
+
+                // Wait a bit for the library to finish initializing
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Check again after delay
+                meSpeakLib = window.meSpeak || window.mespeak || window.MeSpeak;
+                console.log('After 100ms delay - typeof window.meSpeak:', typeof window.meSpeak);
+
+                if (typeof meSpeakLib !== 'undefined') {
+                    window.meSpeak = meSpeakLib; // Ensure it's on window.meSpeak
+
                     try {
                         console.log('🔧 Initializing meSpeak library...');
+                        console.log('meSpeak object:', meSpeakLib);
+                        console.log('meSpeak methods:', Object.keys(meSpeakLib));
 
                         // Load default config
                         await new Promise((resolve, reject) => {
-                            meSpeak.loadConfig('https://www.masswerk.at/mespeak/mespeak_config.json');
+                            meSpeakLib.loadConfig('https://www.masswerk.at/mespeak/mespeak_config.json');
                             setTimeout(resolve, 500);
                         });
                         console.log('✅ meSpeak config loaded');
 
                         // Load default English voice
                         await new Promise((resolve, reject) => {
-                            meSpeak.loadVoice('https://www.masswerk.at/mespeak/voices/en/en-us.json');
+                            meSpeakLib.loadVoice('https://www.masswerk.at/mespeak/voices/en/en-us.json');
                             setTimeout(resolve, 500);
                         });
                         console.log('✅ meSpeak voice loaded');
@@ -188,7 +206,11 @@
                         console.error('❌ Error loading meSpeak:', error);
                     }
                 } else {
-                    console.error('❌ meSpeak library loaded but window.meSpeak is undefined');
+                    console.error('❌ meSpeak library loaded but not found in global scope');
+                    console.log('Window object keys (first 20):', Object.keys(window).slice(0, 20));
+                    console.log('Searching for meSpeak-like objects...');
+                    const meKeys = Object.keys(window).filter(k => k.toLowerCase().includes('speak'));
+                    console.log('Keys containing "speak":', meKeys);
                 }
             };
 
