@@ -350,14 +350,9 @@ window.piperTTS = {
 
             const voices = await piperLib.voices();
 
-            // Log first voice to debug size issue
-            if (voices.length > 0) {
-                console.log('Voice structure sample:', JSON.stringify(voices[0], null, 2));
-            }
-
             // Transform to our format
             return voices.map(v => {
-                // Extract language info - the language property is an object with code, family, region, name_native, name_english
+                // Extract language info
                 let languageName = 'Unknown';
                 let languageCode = 'unknown';
 
@@ -371,15 +366,23 @@ window.piperTTS = {
                     }
                 }
 
-                // Extract file size - Piper library provides size in bytes as a number
-                const sizeBytes = typeof v.size === 'number' ? v.size : (parseInt(v.size) || 0);
+                // Extract file size from files object
+                // The main .onnx model file contains the actual size
+                let sizeBytes = 0;
+                if (v.files && typeof v.files === 'object') {
+                    // Find the .onnx file (main model file)
+                    const onnxFile = Object.keys(v.files).find(key => key.endsWith('.onnx'));
+                    if (onnxFile && v.files[onnxFile] && v.files[onnxFile].size_bytes) {
+                        sizeBytes = v.files[onnxFile].size_bytes;
+                    }
+                }
 
                 return {
                     id: v.key,
                     name: v.name || v.key,
                     language: languageName,
                     languageCode: languageCode,
-                    gender: 'NEUTRAL', // Piper doesn't provide gender info
+                    gender: 'NEUTRAL',
                     quality: this.extractQuality(v.key),
                     sizeBytes: sizeBytes
                 };
