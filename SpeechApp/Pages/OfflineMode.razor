@@ -4,6 +4,8 @@
 @using SpeechApp.Models
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
+@inject PiperTTSService PiperService
+@inject ESpeakNGService ESpeakService
 
 <PageTitle>Offline Mode - Stitch TTS</PageTitle>
 
@@ -237,9 +239,6 @@
 </MudContainer>
 
 @code {
-    private PiperTTSService? _piperService;
-    private ESpeakNGService? _espeakService;
-
     private List<OfflineVoiceModel>? _piperAvailableModels;
     private long _storageUsed;
     private string _storageUsedFormatted = "0 MB";
@@ -251,20 +250,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Initialize services (would be injected in production)
-        _piperService = new PiperTTSService(JS, null!); // StorageService would be injected
-        _espeakService = new ESpeakNGService(JS);
-
+        // Services are now properly injected via @inject directives
         await LoadModels();
         await UpdateStorageInfo();
     }
 
     private async Task LoadModels()
     {
-        if (_piperService != null)
+        if (PiperService != null)
         {
-            _piperAvailableModels = await _piperService.GetAvailableModelsAsync();
-            var downloaded = await _piperService.GetDownloadedModelsAsync();
+            _piperAvailableModels = await PiperService.GetAvailableModelsAsync();
+            var downloaded = await PiperService.GetDownloadedModelsAsync();
 
             // Mark downloaded models
             foreach (var model in _piperAvailableModels)
@@ -276,9 +272,9 @@
 
     private async Task UpdateStorageInfo()
     {
-        if (_piperService != null)
+        if (PiperService != null)
         {
-            _storageUsed = await _piperService.GetTotalModelSizeAsync();
+            _storageUsed = await PiperService.GetTotalModelSizeAsync();
             _storageUsedFormatted = FormatBytes(_storageUsed);
 
             // Assume 1 GB browser limit
@@ -295,7 +291,7 @@
 
         try
         {
-            var success = await _piperService!.DownloadModelAsync(modelId, progress =>
+            var success = await PiperService!.DownloadModelAsync(modelId, progress =>
             {
                 _downloadProgress = progress;
                 InvokeAsync(StateHasChanged);
@@ -328,9 +324,9 @@
     {
         var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to remove this voice model?");
 
-        if (confirmed && _piperService != null)
+        if (confirmed && PiperService != null)
         {
-            var success = await _piperService.RemoveModelAsync(modelId);
+            var success = await PiperService.RemoveModelAsync(modelId);
 
             if (success)
             {
