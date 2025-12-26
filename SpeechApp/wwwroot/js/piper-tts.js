@@ -166,6 +166,28 @@ window.piperTTS = {
                 throw new Error(errorMsg);
             }
 
+            // Get available voices from library to check format
+            let availableVoices = [];
+            if (typeof piperLib.voices === 'function') {
+                availableVoices = await piperLib.voices();
+                console.log('📋 Available voices from library:', availableVoices);
+            }
+
+            // Check if the modelId is in the available voices
+            const voiceMatch = availableVoices.find(v =>
+                v.key === modelId ||
+                v.name === modelId ||
+                v.id === modelId
+            );
+
+            if (voiceMatch) {
+                console.log('✅ Found matching voice:', voiceMatch);
+                modelId = voiceMatch.key || voiceMatch.id || modelId;
+            } else {
+                console.warn('⚠️ Model ID not found in library voices, trying anyway:', modelId);
+                console.log('Available voice keys:', availableVoices.map(v => v.key || v.id || v.name));
+            }
+
             console.log('📥 Starting download for model:', modelId);
 
             // Use Piper library's download with progress tracking
