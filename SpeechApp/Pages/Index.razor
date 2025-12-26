@@ -336,6 +336,7 @@ else
     private string? _audioDataUrl;
     private string _audioMimeType = "audio/mpeg";
     private string _synthesisProgress = "Synthesizing...";
+    private string? _lastPiperUpdateCheck;
 
     protected override async Task OnInitializedAsync()
     {
@@ -350,6 +351,31 @@ else
             // Check if this is first-time setup or returning user
             var salt = await LocalStorage.GetItemAsStringAsync("encryption_salt");
             _isFirstTimeSetup = string.IsNullOrEmpty(salt);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && _isEncryptionInitialized)
+        {
+            // Check if Piper models were updated (e.g., downloaded on Offline page)
+            var currentUpdate = await StorageService.GetPreferenceAsync<string>("piper_models_updated");
+
+            if (!string.IsNullOrEmpty(currentUpdate) && currentUpdate != _lastPiperUpdateCheck)
+            {
+                _lastPiperUpdateCheck = currentUpdate;
+
+                // If Piper is selected, refresh voices to show newly downloaded models
+                if (_selectedProviderId == "piper")
+                {
+                    await LoadVoicesForProvider(_selectedProviderId, bypassCache: true);
+                    StateHasChanged();
+
+                    Snackbar.Add("Piper voice list updated with newly downloaded models", Severity.Info);
+                }
+            }
         }
     }
 

@@ -72,7 +72,11 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
     // ITTSProvider implementation
     public Task<List<Voice>> GetVoicesAsync(bool bypassCache = false, CancellationToken cancellationToken = default)
     {
-        // For offline providers, cache doesn't apply - always return downloaded voices
+        // Clear cache if requested to bypass it (e.g., after downloading new models)
+        if (bypassCache)
+        {
+            _downloadedModels = null;
+        }
         return GetVoicesAsync(cancellationToken);
     }
 
@@ -191,6 +195,9 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
                 // Refresh downloaded models list
                 _downloadedModels = null;
                 await GetDownloadedModelsAsync();
+
+                // Set flag to notify other pages that models have been updated
+                await _storageService.SetPreferenceAsync("piper_models_updated", DateTime.UtcNow.Ticks.ToString());
             }
 
             return success;
@@ -213,6 +220,9 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
                 // Refresh downloaded models list
                 _downloadedModels = null;
                 await GetDownloadedModelsAsync();
+
+                // Set flag to notify other pages that models have been updated
+                await _storageService.SetPreferenceAsync("piper_models_updated", DateTime.UtcNow.Ticks.ToString());
             }
 
             return success;
