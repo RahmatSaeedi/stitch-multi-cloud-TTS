@@ -4,6 +4,18 @@ using SpeechApp.Services.Interfaces;
 
 namespace SpeechApp.Services.Offline;
 
+// DTO for Piper voice info from JavaScript
+public class PiperVoiceInfo
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
+    public string LanguageCode { get; set; } = string.Empty;
+    public string Gender { get; set; } = string.Empty;
+    public string Quality { get; set; } = string.Empty;
+    public long SizeBytes { get; set; }
+}
+
 public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
 {
     private readonly IJSRuntime _jsRuntime;
@@ -241,9 +253,46 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
 
     public async Task<List<OfflineVoiceModel>> GetAvailableModelsAsync()
     {
-        // Comprehensive Piper voice catalog - 50+ languages with multiple quality levels
-        // Models persist indefinitely in IndexedDB unless manually deleted or storage quota exceeded
-        return await Task.FromResult(new List<OfflineVoiceModel>
+        // Fetch available voices from the Piper library dynamically
+        // This ensures we always have the latest voice list and correct IDs
+        try
+        {
+            Console.WriteLine("Fetching available Piper voices from library...");
+            var voices = await _jsRuntime.InvokeAsync<List<PiperVoiceInfo>>("piperTTS.getAvailableVoices");
+
+            if (voices == null || voices.Count == 0)
+            {
+                Console.WriteLine("⚠️ No voices returned from library, using fallback");
+                return GetFallbackVoices();
+            }
+
+            Console.WriteLine($"✅ Retrieved {voices.Count} voices from Piper library");
+
+            return voices.Select(v => new OfflineVoiceModel
+            {
+                Id = v.Id,
+                Name = v.Name,
+                Language = v.Language,
+                LanguageCode = v.LanguageCode,
+                Gender = v.Gender,
+                Quality = v.Quality,
+                SizeBytes = v.SizeBytes,
+                Provider = PROVIDER_ID,
+                Description = $"{v.Name} - {v.Quality} quality"
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching available voices: {ex.Message}");
+            Console.WriteLine("Using fallback voice list");
+            return GetFallbackVoices();
+        }
+    }
+
+    private List<OfflineVoiceModel> GetFallbackVoices()
+    {
+        // Fallback list with common voices if JavaScript fails
+        return new List<OfflineVoiceModel>
         {
             // ========== ENGLISH ==========
             // US English
@@ -389,8 +438,8 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
             new OfflineVoiceModel { Id = "ne_NP-google-medium", Name = "Google Nepal", Language = "Nepali", LanguageCode = "ne-NP", Gender = "NEUTRAL", Quality = "Medium", SizeBytes = 58 * 1024 * 1024, Provider = PROVIDER_ID, Description = "Nepali voice" },
 
             // ========== HEBREW ==========
-            new OfflineVoiceModel { Id = "he_IL-edotts-medium", Name = "Edotts", Language = "Hebrew", LanguageCode = "he-IL", Gender = "NEUTRAL", Quality = "Medium", SizeBytes = 49 * 1024 * 1024, Provider = PROVIDER_ID, Description = "Hebrew voice" },
-        });
+            new OfflineVoiceModel { Id = "he_IL-edotts-medium", Name = "Edotts", Language = "Hebrew", LanguageCode = "he-IL", Gender = "NEUTRAL", Quality = "Medium", SizeBytes = 49 * 1024 * 1024, Provider = PROVIDER_ID, Description = "Hebrew voice" }
+        };
     }
 
     public async Task<List<OfflineVoiceModel>> GetDownloadedModelsAsync()

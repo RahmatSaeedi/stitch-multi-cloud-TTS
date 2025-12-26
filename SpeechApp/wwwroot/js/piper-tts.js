@@ -422,6 +422,51 @@ window.piperTTS = {
     },
 
     /**
+     * Get all available voices from the Piper library
+     * @returns {Promise<Array>} Array of voice metadata objects
+     */
+    async getAvailableVoices() {
+        try {
+            if (!this.isInitialized) {
+                await this.init();
+            }
+
+            if (!piperLib || typeof piperLib.voices !== 'function') {
+                console.warn('⚠️ Piper library or voices method not available');
+                return [];
+            }
+
+            const voices = await piperLib.voices();
+            console.log(`📋 Retrieved ${voices.length} available Piper voices`);
+
+            // Transform to our format
+            return voices.map(v => ({
+                id: v.key,
+                name: v.name || v.key,
+                language: v.language || 'Unknown',
+                languageCode: v.language || 'unknown',
+                gender: 'NEUTRAL', // Piper doesn't provide gender info
+                quality: this.extractQuality(v.key),
+                sizeBytes: v.size || 0
+            }));
+        } catch (error) {
+            console.error('❌ Error getting available voices:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Extract quality level from voice key
+     */
+    extractQuality(key) {
+        if (key.endsWith('-x_low')) return 'Very Low';
+        if (key.endsWith('-low')) return 'Low';
+        if (key.endsWith('-medium')) return 'Medium';
+        if (key.endsWith('-high')) return 'High';
+        return 'Medium';
+    },
+
+    /**
      * Promisify IndexedDB request
      */
     promisifyRequest(request) {
