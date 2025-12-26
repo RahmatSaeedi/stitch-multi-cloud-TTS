@@ -204,12 +204,34 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
 
             if (success)
             {
-                // Refresh downloaded models list
-                _downloadedModels = null;
-                await GetDownloadedModelsAsync();
+                Console.WriteLine("✅ Download completed, refreshing model list...");
 
-                // Set flag to notify other pages that models have been updated
-                await _storageService.SetPreferenceAsync("piper_models_updated", DateTime.UtcNow.Ticks.ToString());
+                try
+                {
+                    // Refresh downloaded models list
+                    _downloadedModels = null;
+                    Console.WriteLine("Calling GetDownloadedModelsAsync...");
+                    var downloaded = await GetDownloadedModelsAsync();
+                    Console.WriteLine($"Refreshed downloaded models: {downloaded.Count} models");
+
+                    // Set flag to notify other pages that models have been updated
+                    var updateTimestamp = DateTime.UtcNow.Ticks.ToString();
+                    Console.WriteLine($"Setting piper_models_updated flag to: {updateTimestamp}");
+                    await _storageService.SetPreferenceAsync<string>("piper_models_updated", updateTimestamp);
+                    Console.WriteLine("✅ Update flag set successfully");
+                }
+                catch (Exception refreshEx)
+                {
+                    Console.WriteLine($"⚠️ Error during post-download refresh: {refreshEx.GetType().Name}");
+                    Console.WriteLine($"Message: {refreshEx.Message}");
+                    Console.WriteLine($"Stack trace: {refreshEx.StackTrace}");
+                    if (refreshEx.InnerException != null)
+                    {
+                        Console.WriteLine($"Inner exception: {refreshEx.InnerException.GetType().Name} - {refreshEx.InnerException.Message}");
+                    }
+                    // Don't fail the download just because refresh failed
+                    // The model is still downloaded successfully
+                }
             }
 
             return success;
@@ -445,7 +467,10 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
     public async Task<List<OfflineVoiceModel>> GetDownloadedModelsAsync()
     {
         if (_downloadedModels != null)
+        {
+            Console.WriteLine($"Returning cached downloaded models: {_downloadedModels.Count} models");
             return _downloadedModels;
+        }
 
         try
         {
@@ -454,16 +479,26 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
 
             if (modelIds == null)
             {
-                Console.WriteLine("Warning: JavaScript returned null for downloaded models");
+                Console.WriteLine("⚠️ JavaScript returned null for downloaded models");
                 modelIds = Array.Empty<string>();
             }
 
             Console.WriteLine($"Found {modelIds.Length} downloaded models: {string.Join(", ", modelIds)}");
 
+            Console.WriteLine("Fetching available models list...");
             var available = await GetAvailableModelsAsync();
 
+            if (available == null)
+            {
+                Console.WriteLine("❌ GetAvailableModelsAsync returned null!");
+                _downloadedModels = new List<OfflineVoiceModel>();
+                return _downloadedModels;
+            }
+
+            Console.WriteLine($"Available models count: {available.Count}");
+
             _downloadedModels = available
-                .Where(m => modelIds.Contains(m.Id))
+                .Where(m => m != null && modelIds.Contains(m.Id))
                 .Select(m =>
                 {
                     m.IsDownloaded = true;
@@ -472,14 +507,20 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
                 })
                 .ToList();
 
-            Console.WriteLine($"Matched {_downloadedModels.Count} models to available voice list");
+            Console.WriteLine($"✅ Matched {_downloadedModels.Count} models to available voice list");
             return _downloadedModels;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in GetDownloadedModelsAsync: {ex.GetType().Name} - {ex.Message}");
+            Console.WriteLine($"❌ Error in GetDownloadedModelsAsync: {ex.GetType().Name} - {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            return new List<OfflineVoiceModel>();
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner exception: {ex.InnerException.GetType().Name} - {ex.InnerException.Message}");
+                Console.WriteLine($"Inner stack trace: {ex.InnerException.StackTrace}");
+            }
+            _downloadedModels = new List<OfflineVoiceModel>();
+            return _downloadedModels;
         }
     }
 

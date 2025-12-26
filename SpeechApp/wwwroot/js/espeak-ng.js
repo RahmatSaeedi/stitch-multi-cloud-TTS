@@ -19,40 +19,59 @@ window.espeakNG = {
      */
     async initialize() {
         if (this._isInitialized) {
+            console.log('ℹ️ eSpeak-NG already initialized');
             return true;
         }
 
         try {
+            console.log('🔧 Initializing eSpeak-NG...');
+
             // Wait for meSpeak library to load (with retry)
             let retries = 0;
-            while (typeof window.meSpeak === 'undefined' && retries < 20) {
+            const maxRetries = 30; // 3 seconds total
+            console.log('⏳ Waiting for meSpeak library to load...');
+
+            while (typeof window.meSpeak === 'undefined' && retries < maxRetries) {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 retries++;
+
+                if (retries % 10 === 0) {
+                    console.log(`⏳ Still waiting for meSpeak... (${retries}/${maxRetries})`);
+                }
             }
 
             if (typeof window.meSpeak !== 'undefined' && window.meSpeak !== null) {
                 espeakLib = window.meSpeak;
-                console.log('✅ meSpeak library loaded successfully');
+                console.log('✅ meSpeak library found:', espeakLib);
+                console.log('meSpeak type:', typeof espeakLib);
+                console.log('Available meSpeak methods:', Object.keys(espeakLib).filter(k => typeof espeakLib[k] === 'function'));
 
                 // Check if required methods exist
                 if (typeof espeakLib.getWav === 'function') {
                     console.log('✅ meSpeak.getWav method available');
                 } else {
                     console.warn('⚠️ meSpeak.getWav method not available');
+                    console.log('Available methods:', Object.keys(espeakLib));
+                    return false;
                 }
 
                 // Wait for library to be fully ready
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 300));
 
                 this._isInitialized = true;
+                console.log('✅ eSpeak-NG initialization complete');
                 return true;
             } else {
-                console.error('❌ eSpeak-NG initialization failed: meSpeak library not loaded');
+                console.error('❌ eSpeak-NG initialization failed: meSpeak library not loaded after', retries * 100, 'ms');
+                console.log('window.meSpeak type:', typeof window.meSpeak);
+                console.log('window.meSpeak value:', window.meSpeak);
                 console.log('Check if meSpeak.js loaded from CDN successfully');
+                console.log('CDN URL: https://www.masswerk.at/mespeak/mespeak.js');
                 return false;
             }
         } catch (error) {
             console.error('❌ eSpeak-NG initialization error:', error);
+            console.error('Error stack:', error.stack);
             return false;
         }
     },
