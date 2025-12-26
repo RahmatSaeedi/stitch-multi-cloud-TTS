@@ -32,19 +32,27 @@ window.espeakNG = {
 
             if (typeof window.meSpeak !== 'undefined' && window.meSpeak !== null) {
                 espeakLib = window.meSpeak;
+                console.log('✅ meSpeak library loaded successfully');
 
-                // Wait for voices to load
+                // Check if required methods exist
+                if (typeof espeakLib.getWav === 'function') {
+                    console.log('✅ meSpeak.getWav method available');
+                } else {
+                    console.warn('⚠️ meSpeak.getWav method not available');
+                }
+
+                // Wait for library to be fully ready
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // Only set _isInitialized if espeakLib was successfully set
                 this._isInitialized = true;
                 return true;
             } else {
-                console.error('eSpeak-NG initialization failed: Web Speech API not available');
+                console.error('❌ eSpeak-NG initialization failed: meSpeak library not loaded');
+                console.log('Check if meSpeak.js loaded from CDN successfully');
                 return false;
             }
         } catch (error) {
-            console.error('eSpeak-NG initialization error:', error);
+            console.error('❌ eSpeak-NG initialization error:', error);
             return false;
         }
     },

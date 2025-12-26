@@ -166,55 +166,84 @@ window.piperTTS = {
                 throw new Error(errorMsg);
             }
 
-            // Get available voices from library to check format
+            // Get available voices from library
             let availableVoices = [];
-            if (typeof piperLib.voices === 'function') {
-                availableVoices = await piperLib.voices();
-                console.log('📋 Available voices from library:', availableVoices);
+            try {
+                // Check if voices is a property or function
+                if (typeof piperLib.voices === 'function') {
+                    console.log('Calling piperLib.voices()...');
+                    availableVoices = await piperLib.voices();
+                } else if (Array.isArray(piperLib.voices)) {
+                    console.log('Using piperLib.voices array...');
+                    availableVoices = piperLib.voices;
+                } else {
+                    console.log('piperLib.voices type:', typeof piperLib.voices);
+                }
+
+                if (availableVoices && availableVoices.length > 0) {
+                    console.log('📋 Available voices from library:', availableVoices.slice(0, 5)); // Show first 5
+                    console.log('Total voices:', availableVoices.length);
+                } else {
+                    console.warn('⚠️ No voices returned from library');
+                }
+            } catch (voicesError) {
+                console.warn('⚠️ Error getting voices:', voicesError);
             }
 
             // Check if the modelId is in the available voices
-            const voiceMatch = availableVoices.find(v =>
-                v.key === modelId ||
-                v.name === modelId ||
-                v.id === modelId
-            );
+            let actualModelId = modelId;
+            if (availableVoices && availableVoices.length > 0) {
+                const voiceMatch = availableVoices.find(v =>
+                    v.key === modelId ||
+                    v.name === modelId ||
+                    v.id === modelId
+                );
 
-            if (voiceMatch) {
-                console.log('✅ Found matching voice:', voiceMatch);
-                modelId = voiceMatch.key || voiceMatch.id || modelId;
-            } else {
-                console.warn('⚠️ Model ID not found in library voices, trying anyway:', modelId);
-                console.log('Available voice keys:', availableVoices.map(v => v.key || v.id || v.name));
+                if (voiceMatch) {
+                    console.log('✅ Found matching voice:', voiceMatch);
+                    actualModelId = voiceMatch.key || voiceMatch.id || modelId;
+                } else {
+                    console.warn('⚠️ Model ID not found in library voices');
+                    console.log('Requested:', modelId);
+                    console.log('Available keys:', availableVoices.slice(0, 10).map(v => v.key || v.id || v.name));
+                }
             }
 
-            console.log('📥 Starting download for model:', modelId);
+            console.log('📥 Starting download for model:', actualModelId);
 
             // Use Piper library's download with progress tracking
-            await piperLib.download(modelId, (progress) => {
-                // Progress object has loaded and total properties
-                const percentage = progress.total > 0
-                    ? Math.round((progress.loaded * 100) / progress.total)
-                    : 0;
+            // The download function will throw on error
+            try {
+                await piperLib.download(actualModelId, (progress) => {
+                    // Progress object has loaded and total properties
+                    const percentage = progress.total > 0
+                        ? Math.round((progress.loaded * 100) / progress.total)
+                        : 0;
 
-                console.log(`Download progress: ${percentage}%`);
+                    console.log(`Download progress: ${percentage}%`);
 
-                if (progressCallback) {
-                    try {
-                        progressCallback.invokeMethodAsync('Invoke', percentage);
-                    } catch (callbackError) {
-                        console.warn('Progress callback error:', callbackError);
+                    if (progressCallback) {
+                        try {
+                            progressCallback.invokeMethodAsync('Invoke', percentage);
+                        } catch (callbackError) {
+                            console.warn('Progress callback error:', callbackError);
+                        }
                     }
-                }
-            });
+                });
 
-            console.log('✅ Download completed, storing metadata');
+                console.log('✅ Download completed, storing metadata');
 
-            // Store metadata in our IndexedDB
-            await this.storeModel(modelId, new ArrayBuffer(0)); // Metadata only - actual model is in Piper's storage
+                // Store metadata in our IndexedDB
+                await this.storeModel(actualModelId, new ArrayBuffer(0));
 
-            console.log('✅ Model downloaded successfully:', modelId);
-            return true;
+                console.log('✅ Model downloaded successfully:', actualModelId);
+                return true;
+            } catch (downloadError) {
+                console.error('❌ Download failed:', downloadError);
+                console.error('Download error message:', downloadError.message);
+                console.error('Download error stack:', downloadError.stack);
+                throw downloadError; // Re-throw to be caught by outer try-catch
+            }
         } catch (error) {
             console.error('❌ Piper download error:', error);
             console.error('Error stack:', error.stack);
@@ -254,7 +283,10 @@ window.piperTTS = {
      */
     async getDownloadedModels() {
         try {
+            console.log('📋 Getting downloaded models...');
+
             if (!piperLib) {
+                console.log('Piper library not loaded, using IndexedDB fallback');
                 // Fallback to IndexedDB if library not loaded
                 if (!this.db) {
                     await this.init();
@@ -264,14 +296,42 @@ window.piperTTS = {
                 const store = transaction.objectStore('models');
                 const request = store.getAllKeys();
 
-                return await this.promisifyRequest(request);
+                const keys = await this.promisifyRequest(request);
+                console.log('Downloaded models from IndexedDB:', keys);
+                return keys || [];
             }
 
             // Use Piper library's stored() method to get actually downloaded models
+            console.log('Calling piperLib.stored()...');
             const storedModels = await piperLib.stored();
+            console.log('Stored models from Piper library:', storedModels);
+            console.log('Type:', typeof storedModels);
+            console.log('Is array:', Array.isArray(storedModels));
+
+            // Ensure we always return an array of strings
+            if (!storedModels) {
+                console.warn('⚠️ piperLib.stored() returned null/undefined');
+                return [];
+            }
+
+            if (!Array.isArray(storedModels)) {
+                console.warn('⚠️ piperLib.stored() did not return array:', storedModels);
+                return [];
+            }
+
+            // If array contains objects, extract the IDs
+            if (storedModels.length > 0 && typeof storedModels[0] === 'object') {
+                console.log('Converting objects to string IDs');
+                const ids = storedModels.map(m => m.key || m.id || m.name || String(m));
+                console.log('Model IDs:', ids);
+                return ids;
+            }
+
+            console.log('Returning model IDs:', storedModels);
             return storedModels;
         } catch (error) {
-            console.error('Error getting models:', error);
+            console.error('❌ Error getting downloaded models:', error);
+            console.error('Stack:', error.stack);
             return [];
         }
     },

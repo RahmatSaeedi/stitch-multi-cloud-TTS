@@ -400,7 +400,17 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
 
         try
         {
+            Console.WriteLine("Getting downloaded Piper models from JavaScript...");
             var modelIds = await _jsRuntime.InvokeAsync<string[]>("piperTTS.getDownloadedModels");
+
+            if (modelIds == null)
+            {
+                Console.WriteLine("Warning: JavaScript returned null for downloaded models");
+                modelIds = Array.Empty<string>();
+            }
+
+            Console.WriteLine($"Found {modelIds.Length} downloaded models: {string.Join(", ", modelIds)}");
+
             var available = await GetAvailableModelsAsync();
 
             _downloadedModels = available
@@ -413,10 +423,13 @@ public class PiperTTSService : ITTSProvider, IOfflineTTSProvider
                 })
                 .ToList();
 
+            Console.WriteLine($"Matched {_downloadedModels.Count} models to available voice list");
             return _downloadedModels;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"Error in GetDownloadedModelsAsync: {ex.GetType().Name} - {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return new List<OfflineVoiceModel>();
         }
     }
