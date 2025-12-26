@@ -153,74 +153,21 @@
         window.piperTTSLib = piperTTS;
     </script>
 
-    <!-- eSpeak-NG using meSpeak.js library -->
-    <!-- meSpeak.js - A JavaScript port of eSpeak that can export WAV files -->
+    <!-- eSpeak-NG using speak.js library -->
+    <!-- speak.js - A JavaScript port of eSpeak text-to-speech synthesizer -->
+    <!-- Note: eSpeak-NG is currently disabled due to library compatibility issues -->
+    <!-- Piper TTS provides better quality offline synthesis -->
     <script>
-        // Load meSpeak library and configure it
-        (function() {
-            const script = document.createElement('script');
-            script.src = 'https://www.masswerk.at/mespeak/mespeak.js';
-            script.async = true;
+        // eSpeak-NG temporarily disabled - using Piper TTS as primary offline provider
+        // The meSpeak.js library from masswerk.at is no longer exposing a global object
+        // and alternative CDNs for speak.js have similar issues
+        // Future: Consider bundling speak.js directly or using a maintained alternative
+        console.log('ℹ️ eSpeak-NG offline TTS is temporarily disabled');
+        console.log('ℹ️ Use Piper TTS for high-quality offline speech synthesis');
+        console.log('ℹ️ Piper supports 124 voices across 50+ languages');
 
-            script.onload = async function() {
-                console.log('✅ meSpeak.js script loaded');
-                console.log('Checking global scope for meSpeak...');
-                console.log('typeof window.meSpeak:', typeof window.meSpeak);
-                console.log('typeof meSpeak:', typeof meSpeak);
-                console.log('window.meSpeak:', window.meSpeak);
-
-                // Try to find meSpeak in different locations
-                let meSpeakLib = window.meSpeak || window.mespeak || window.MeSpeak;
-
-                // Wait a bit for the library to finish initializing
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Check again after delay
-                meSpeakLib = window.meSpeak || window.mespeak || window.MeSpeak;
-                console.log('After 100ms delay - typeof window.meSpeak:', typeof window.meSpeak);
-
-                if (typeof meSpeakLib !== 'undefined') {
-                    window.meSpeak = meSpeakLib; // Ensure it's on window.meSpeak
-
-                    try {
-                        console.log('🔧 Initializing meSpeak library...');
-                        console.log('meSpeak object:', meSpeakLib);
-                        console.log('meSpeak methods:', Object.keys(meSpeakLib));
-
-                        // Load default config
-                        await new Promise((resolve, reject) => {
-                            meSpeakLib.loadConfig('https://www.masswerk.at/mespeak/mespeak_config.json');
-                            setTimeout(resolve, 500);
-                        });
-                        console.log('✅ meSpeak config loaded');
-
-                        // Load default English voice
-                        await new Promise((resolve, reject) => {
-                            meSpeakLib.loadVoice('https://www.masswerk.at/mespeak/voices/en/en-us.json');
-                            setTimeout(resolve, 500);
-                        });
-                        console.log('✅ meSpeak voice loaded');
-
-                        console.log('✅ meSpeak initialized successfully');
-                    } catch (error) {
-                        console.error('❌ Error loading meSpeak:', error);
-                    }
-                } else {
-                    console.error('❌ meSpeak library loaded but not found in global scope');
-                    console.log('Window object keys (first 20):', Object.keys(window).slice(0, 20));
-                    console.log('Searching for meSpeak-like objects...');
-                    const meKeys = Object.keys(window).filter(k => k.toLowerCase().includes('speak'));
-                    console.log('Keys containing "speak":', meKeys);
-                }
-            };
-
-            script.onerror = function() {
-                console.error('❌ Failed to load meSpeak.js from CDN');
-                console.log('Check network connectivity and CDN availability: https://www.masswerk.at/mespeak/');
-            };
-
-            document.head.appendChild(script);
-        })();
+        // Set a flag so espeak-ng.js knows not to initialize
+        window.espeakDisabled = true;
     </script>
     <script src="js/piper-tts.js"></script>
     <script src="js/espeak-ng.js"></script>

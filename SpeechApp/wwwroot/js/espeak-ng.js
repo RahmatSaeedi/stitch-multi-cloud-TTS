@@ -18,6 +18,12 @@ window.espeakNG = {
      * Initialize eSpeak-NG
      */
     async initialize() {
+        // Check if eSpeak has been disabled
+        if (window.espeakDisabled) {
+            console.log('ℹ️ eSpeak-NG is disabled - using Piper TTS for offline synthesis');
+            return false;
+        }
+
         if (this._isInitialized) {
             console.log('ℹ️ eSpeak-NG already initialized');
             return true;
