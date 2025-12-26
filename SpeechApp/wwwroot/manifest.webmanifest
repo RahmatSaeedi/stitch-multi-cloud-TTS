@@ -1,9 +1,9 @@
 {
   "name": "Stitch Multi-Cloud Text-to-Speech",
   "short_name": "Stitch TTS",
-  "id": "./",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/stitch-multi-cloud-TTS/",
+  "start_url": "/stitch-multi-cloud-TTS/",
+  "scope": "/stitch-multi-cloud-TTS/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#121212",
@@ -32,26 +32,26 @@
       "name": "New Synthesis",
       "short_name": "Synthesize",
       "description": "Convert text to speech instantly",
-      "url": "./",
+      "url": "/stitch-multi-cloud-TTS/",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Upload File",
       "short_name": "Upload",
       "description": "Upload PDF or text file to convert",
-      "url": "./upload",
+      "url": "/stitch-multi-cloud-TTS/upload",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "API Keys",
       "short_name": "Keys",
       "description": "Manage your TTS provider keys",
-      "url": "./api-keys",
+      "url": "/stitch-multi-cloud-TTS/api-keys",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ],
   "share_target": {
-    "action": "./upload",
+    "action": "/stitch-multi-cloud-TTS/upload",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {

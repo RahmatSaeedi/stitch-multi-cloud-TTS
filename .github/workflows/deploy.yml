@@ -41,21 +41,11 @@ jobs:
     - name: Build
       run: dotnet build SpeechApp/SpeechApp.csproj --configuration Release --no-restore
 
-    - name: Publish
-      run: dotnet publish SpeechApp/SpeechApp.csproj -c Release -o release --nologo
+    - name: Publish for GitHub Pages
+      run: dotnet publish SpeechApp/SpeechApp.csproj -c Release -o release --nologo -p:GitHubPages=true
 
     - name: Add .nojekyll file
       run: touch release/wwwroot/.nojekyll
-
-    - name: Fix base paths for GitHub Pages
-      run: |
-        sed -i 's|<base href="/" />|<base href="/stitch-multi-cloud-TTS/" />|g' release/wwwroot/index.html
-        sed -i 's|"id": "./"|"id": "/stitch-multi-cloud-TTS/"|g' release/wwwroot/manifest.webmanifest
-        sed -i 's|"start_url": "./"|"start_url": "/stitch-multi-cloud-TTS/"|g' release/wwwroot/manifest.webmanifest
-        sed -i 's|"scope": "./"|"scope": "/stitch-multi-cloud-TTS/"|g' release/wwwroot/manifest.webmanifest
-        sed -i 's|"url": "./|"url": "/stitch-multi-cloud-TTS/|g' release/wwwroot/manifest.webmanifest
-        sed -i 's|"action": "./|"action": "/stitch-multi-cloud-TTS/|g' release/wwwroot/manifest.webmanifest
-        sed -i 's|const base = "/";|const base = "/stitch-multi-cloud-TTS/";|g' release/wwwroot/service-worker.published.js || true
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
