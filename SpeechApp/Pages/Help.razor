@@ -111,7 +111,6 @@
                     </MudText>
                     <ul class="mb-4">
                         <li><strong>Piper TTS</strong> - High-quality neural voices (50+ languages). Download models from <MudLink Href="offline">Offline Mode</MudLink> page.</li>
-                        <li><strong>eSpeak-NG</strong> - Lightweight, instant synthesis (127+ languages). Uses your browser's built-in voices.</li>
                     </ul>
                     <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
                         💡 <strong>Tip:</strong> You can use both! Set up cloud providers for premium quality, and download offline models for when you don't have internet.
@@ -248,7 +247,7 @@
                                 <td>Offline use, privacy-critical apps</td>
                             </tr>
                             <tr>
-                                <td><strong>eSpeak-NG</strong></td>
+                                <td><strong>Piper TTS</strong></td>
                                 <td>⭐⭐ Basic (robotic)</td>
                                 <td>✅ FREE (offline)</td>
                                 <td>Browser-dependent</td>
@@ -276,7 +275,7 @@
                             <strong>For offline/privacy:</strong> Download <strong>Piper TTS</strong> models for neural quality without internet
                         </MudListItem>
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Science">
-                            <strong>For testing:</strong> Use <strong>eSpeak-NG</strong> (instant, no setup) or ElevenLabs free tier
+                            <strong>For testing:</strong> Use <strong>Piper TTS</strong> (instant, no setup) or ElevenLabs free tier
                         </MudListItem>
                     </MudList>
                 </MudCardContent>
@@ -327,82 +326,6 @@
                         💡 <strong>Storage Tips:</strong> Browsers typically allow 1-2 GB of storage for PWAs. If you run out of space, delete unused models from the Offline Mode page. Models are stored permanently until you delete them.
                     </MudText>
 
-                    <MudDivider Class="my-4" />
-
-                    <MudText Typo="Typo.h6" Class="mb-2">🗣️ eSpeak-NG - Instant Lightweight Synthesis</MudText>
-                    <MudText Typo="Typo.body2" Class="mb-3">
-                        eSpeak-NG uses your browser's built-in Web Speech API for instant text-to-speech synthesis. No downloads, no setup, just select and synthesize!
-                    </MudText>
-
-                    <MudText Typo="Typo.subtitle2" Class="mb-2">Features:</MudText>
-                    <ul class="mb-3">
-                        <li><strong>127+ Languages:</strong> Widest language support of any TTS engine</li>
-                        <li><strong>Instant Synthesis:</strong> No model downloads required, works immediately</li>
-                        <li><strong>Tiny Footprint:</strong> Uses browser's built-in voices (~5 MB total)</li>
-                        <li><strong>Adjustable Parameters:</strong> Control speed, pitch, and volume</li>
-                        <li><strong>Perfect for Testing:</strong> Quick prototyping and testing before using paid providers</li>
-                    </ul>
-
-                    <MudText Typo="Typo.subtitle2" Class="mb-2">How to Use eSpeak-NG:</MudText>
-                    <ol class="mb-4">
-                        <li>On Home page, select <strong>eSpeak-NG</strong> as your provider</li>
-                        <li>Choose a voice from the dropdown (uses your browser's system voices)</li>
-                        <li>Adjust speed, pitch, volume as needed</li>
-                        <li>Click <strong>"Synthesize Speech"</strong> - synthesis is instant!</li>
-                    </ol>
-
-                    <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
-                        💡 <strong>Note:</strong> eSpeak-NG quality is more "robotic" than neural TTS, but it's perfect for accessibility, quick testing, or as a fallback when offline.
-                    </MudText>
-
-                    <MudDivider Class="my-4" />
-
-                    <MudText Typo="Typo.h6" Class="mb-2">📊 Piper vs eSpeak-NG Comparison</MudText>
-                    <MudSimpleTable Dense="true" Hover="true" Bordered="true" Class="mb-3">
-                        <thead>
-                            <tr>
-                                <th>Feature</th>
-                                <th>Piper TTS</th>
-                                <th>eSpeak-NG</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Voice Quality</strong></td>
-                                <td>⭐⭐⭐ Neural (natural)</td>
-                                <td>⭐⭐ Basic (robotic)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Setup Required</strong></td>
-                                <td>Yes (download models)</td>
-                                <td>No (instant use)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Storage Space</strong></td>
-                                <td>50-150 MB per voice</td>
-                                <td>~5 MB total</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Languages</strong></td>
-                                <td>50+ languages</td>
-                                <td>127+ languages</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Internet Required</strong></td>
-                                <td>Only for initial download</td>
-                                <td>Never (uses browser)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Best For</strong></td>
-                                <td>Quality offline speech</td>
-                                <td>Quick testing, fallback</td>
-                            </tr>
-                        </tbody>
-                    </MudSimpleTable>
-
-                    <MudText Typo="Typo.body2" Class="mb-3" Color="Color.Secondary">
-                        💡 <strong>Recommendation:</strong> Download a few Piper models for your most-used languages for best quality. Use eSpeak-NG as a lightweight fallback or for quick tests.
-                    </MudText>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -491,7 +414,7 @@
                     </MudList>
 
                     <MudText Typo="Typo.body2" Class="mt-3" Color="Color.Secondary">
-                        💡 <strong>For Maximum Privacy:</strong> Use offline TTS engines (Piper or eSpeak-NG) - your text never leaves your device!
+                        💡 <strong>For Maximum Privacy:</strong> Use offline TTS engines (Piper TTS) - your text never leaves your device!
                     </MudText>
                 </MudCardContent>
             </MudCard>
@@ -759,7 +682,7 @@
                                 <li>Check that you've added an API key for the selected provider</li>
                                 <li>Refresh the page to force a new voice list fetch</li>
                                 <li>Try selecting a different provider to see if the issue is provider-specific</li>
-                                <li>For offline providers (Piper/eSpeak-NG), ensure models are downloaded</li>
+                                <li>For offline providers (Piper), ensure models are downloaded</li>
                             </ul>
                         </MudExpansionPanel>
 
@@ -837,7 +760,7 @@
                                 <li>No servers, no tracking, no analytics, no data collection</li>
                                 <li>Your text and files never touch our servers (we don't even have servers!)</li>
                                 <li>Only your text and API key are sent directly to the TTS provider you choose</li>
-                                <li>For maximum privacy, use offline TTS (Piper or eSpeak-NG) - your text never leaves your device</li>
+                                <li>For maximum privacy, use offline TTS (Piper TTS) - your text never leaves your device</li>
                             </ul>
                             <MudText Typo="Typo.body2">
                                 See the <strong>Privacy & Security</strong> section above for detailed information.
@@ -854,7 +777,6 @@
                                 <li><strong>Fastest:</strong> Deepgram Aura (ultra-low latency &lt;200ms)</li>
                                 <li><strong>Most languages:</strong> Azure Cognitive Services (100+ languages)</li>
                                 <li><strong>Best for privacy/offline:</strong> Piper TTS (neural quality, no internet)</li>
-                                <li><strong>Quick testing:</strong> eSpeak-NG (instant, no setup)</li>
                             </ul>
                             <MudText Typo="Typo.body2">
                                 See the <strong>TTS Provider Comparison</strong> section above for a detailed comparison table.
@@ -867,8 +789,7 @@
                             </MudText>
                             <ul class="mb-2">
                                 <li><strong>Piper TTS:</strong> Download neural TTS models (50-150 MB each) for high-quality offline synthesis. Works in 50+ languages.</li>
-                                <li><strong>eSpeak-NG:</strong> Uses your browser's built-in voices (no download needed). Works in 127+ languages, though quality is more robotic.</li>
-                                <li>Both work completely offline after initial setup (Piper requires model download first)</li>
+                                <li>Works completely offline after initial model download</li>
                                 <li>The PWA can be installed and used offline for the UI, but cloud providers require internet</li>
                             </ul>
                             <MudText Typo="Typo.body2">
@@ -887,7 +808,6 @@
                                 <li><strong>Azure:</strong> ~$0.016 per 1,000 characters (Neural)</li>
                                 <li><strong>Amazon Polly:</strong> ~$0.016 per 1,000 characters (Neural)</li>
                                 <li><strong>Piper TTS:</strong> FREE (offline, unlimited)</li>
-                                <li><strong>eSpeak-NG:</strong> FREE (offline, unlimited)</li>
                             </ul>
                             <MudText Typo="Typo.body2" Class="mb-2">
                                 Example: Converting a 50,000-word book (~300,000 characters) costs about $4.80 with Google Cloud Neural2.
@@ -967,7 +887,7 @@
                                 <li><strong>Deepgram:</strong> 2,000 chars per request</li>
                                 <li><strong>Azure:</strong> 3,000 chars per request</li>
                                 <li><strong>Amazon Polly:</strong> 3,000 chars per request</li>
-                                <li><strong>Piper/eSpeak-NG:</strong> No practical limit (offline)</li>
+                                <li><strong>Piper:</strong> No practical limit (offline)</li>
                             </ul>
                             <MudText Typo="Typo.body2">
                                 <strong>Don't worry!</strong> The app automatically splits long text into chunks at sentence boundaries, synthesizes each chunk, then merges them into a single audio file for you.
@@ -990,7 +910,7 @@
                                 <li>Google, Azure, Polly: Support all three</li>
                                 <li>ElevenLabs: Custom stability/similarity parameters instead</li>
                                 <li>Deepgram: Limited parameter support</li>
-                                <li>Piper/eSpeak-NG: Support speed, pitch, volume</li>
+                                <li>Piper: Support speed, pitch, volume</li>
                             </ul>
                         </MudExpansionPanel>
 
@@ -1037,7 +957,7 @@
                             <ul class="mb-2">
                                 <li><strong>TTS Provider Terms:</strong> Each cloud provider has their own terms of service. Check with Google, ElevenLabs, Azure, AWS, and Deepgram for commercial usage rights.</li>
                                 <li><strong>Voice Licensing:</strong> Some voices may have restrictions on commercial use (especially ElevenLabs voice cloning).</li>
-                                <li><strong>Offline TTS:</strong> Piper models are open-source (check individual model licenses). eSpeak-NG is GPL-licensed.</li>
+                                <li><strong>Offline TTS:</strong> Piper models are open-source (check individual model licenses). Piper TTS is GPL-licensed.</li>
                             </ul>
                             <MudText Typo="Typo.body2">
                                 Always review the terms of service for your chosen TTS provider.
