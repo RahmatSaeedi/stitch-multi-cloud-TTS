@@ -350,6 +350,11 @@ window.piperTTS = {
 
             const voices = await piperLib.voices();
 
+            // Log first voice to debug size issue
+            if (voices.length > 0) {
+                console.log('Voice structure sample:', JSON.stringify(voices[0], null, 2));
+            }
+
             // Transform to our format
             return voices.map(v => {
                 // Extract language info - the language property is an object with code, family, region, name_native, name_english
